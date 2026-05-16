@@ -1,23 +1,23 @@
 package ingest
 
 import (
-	"log"
 	"net/http"
+	"openlambda/internal/function"
 )
 
-func Init() {
-	pendingQueue := NewPendingQueue()
+func Init(pendingQueue *function.PendingQueue) error {
 
 	mux := http.NewServeMux()
-	mux.Handle("/", NewProxyController(pendingQueue))
+	mux.Handle("/", NewIngestController(pendingQueue))
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: mux,
 	}
-
-	go ProcessMockInvocation(pendingQueue)
 	err := server.ListenAndServe()
+
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }

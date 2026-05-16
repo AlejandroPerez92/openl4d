@@ -10,17 +10,17 @@ import (
 	"time"
 )
 
-type ProxyController struct {
-	pendingQueue *PendingQueue
+type IngestController struct {
+	pendingQueue *function.PendingQueue
 }
 
-func NewProxyController(pendingQueue *PendingQueue) *ProxyController {
-	return &ProxyController{
+func NewIngestController(pendingQueue *function.PendingQueue) *IngestController {
+	return &IngestController{
 		pendingQueue: pendingQueue,
 	}
 }
 
-func (p *ProxyController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (p *IngestController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	invocation := function.Invocation{
 		Event:        function.FromRequest(r),
 		ResponseChan: make(chan *function.HttpResponseEvent),

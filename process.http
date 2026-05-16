@@ -1,0 +1,26 @@
+### Execute a random endpoint
+GET http://localhost:8080/fuck-you
+###
+
+### 1) Ask for next invocation
+GET http://localhost:8081/2018-06-01/runtime/invocation/next
+
+> {%
+  const requestId = response.body.requestContext.requestId;
+  client.global.set("requestId", requestId);
+  client.log("requestId=" + requestId);
+%}
+
+### 2) Send function response using captured requestId
+POST http://localhost:8081/runtime/invocation/{{requestId}}/response
+Content-Type: application/json
+
+{
+  "statusCode": 200,
+  "headers": {
+    "content-type": "application/json"
+  },
+  "body": "{\"ok\":true}",
+  "isBase64Encoded": false,
+  "cookies": []
+}
