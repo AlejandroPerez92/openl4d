@@ -1,0 +1,36 @@
+# Binaries
+/openl4d
+/dummy-runtime
+*.exe
+*.test
+*.out
+
+# Go build cache / vendor
+/bin/
+/dist/
+/vendor/
+coverage.out
+coverage.html
+
+# Editor / IDE
+/.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Claude Code / local agent state
+/.claude/
+CLAUDE.local.md
+
+# Environment overrides
+.env
+.env.local
+.envrc
+
+# Local HTTP client scratch files (the .http files used during dev)
+process.http

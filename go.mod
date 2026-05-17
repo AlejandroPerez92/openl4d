@@ -1,4 +1,4 @@
-module openlambda
+module github.com/AlejandroPerez92/openl4d
 
 go 1.26
 

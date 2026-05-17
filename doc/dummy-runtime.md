@@ -5,7 +5,7 @@ This runtime is a native Go worker (keep-alive HTTP client, no artificial sleeps
 Build:
 
 ```bash
-docker build -t openlambda-dummy-runtime ./docker/dummy-runtime
+docker build -t openl4d-dummy-runtime ./docker/dummy-runtime
 ```
 
 Run one worker:
@@ -14,7 +14,7 @@ Run one worker:
 docker run --rm --name runtime1 \
   -e PROCESS_BASE_URL=http://host.docker.internal:8081 \
   -e RESPONSE_QUERY_KEY=echo \
-  openlambda-dummy-runtime
+  openl4d-dummy-runtime
 ```
 
 Simulate blocking work per invocation:
@@ -23,15 +23,15 @@ Simulate blocking work per invocation:
 docker run --rm --name runtime1 \
   -e PROCESS_BASE_URL=http://host.docker.internal:8081 \
   -e BLOCKING_TIME_MS=200 \
-  openlambda-dummy-runtime
+  openl4d-dummy-runtime
 ```
 
 Run multiple workers:
 
 ```bash
-docker run --rm --name runtime1 -e LOG_PREFIX=runtime1 openlambda-dummy-runtime
-docker run --rm --name runtime2 -e LOG_PREFIX=runtime2 openlambda-dummy-runtime
-docker run --rm --name runtime3 -e LOG_PREFIX=runtime3 openlambda-dummy-runtime
+docker run --rm --name runtime1 -e LOG_PREFIX=runtime1 openl4d-dummy-runtime
+docker run --rm --name runtime2 -e LOG_PREFIX=runtime2 openl4d-dummy-runtime
+docker run --rm --name runtime3 -e LOG_PREFIX=runtime3 openl4d-dummy-runtime
 ```
 
 Per-container progress logs:
@@ -39,7 +39,7 @@ Per-container progress logs:
 ```bash
 docker run --rm \
   -e LOG_EVERY=500 \
-  openlambda-dummy-runtime
+  openl4d-dummy-runtime
 ```
 
 The runtime logs `host=<container-hostname> processed=<n> ...`, which helps verify all replicas are serving requests.
@@ -49,7 +49,7 @@ Force runtime errors for matching paths:
 ```bash
 docker run --rm \
   -e FORCE_ERROR_ON_PATH=/fail \
-  openlambda-dummy-runtime
+  openl4d-dummy-runtime
 ```
 
 Echo a query parameter back in response body:

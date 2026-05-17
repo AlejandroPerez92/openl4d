@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"openlambda/internal/function"
 	"strings"
 	"time"
+
+	"github.com/AlejandroPerez92/openl4d/internal/function"
 )
 
 type IngestController struct {

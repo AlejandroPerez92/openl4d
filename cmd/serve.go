@@ -1,5 +1,5 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
+Copyright © 2026 Alejandro Pérez <alxpefa@gmail.com>
 */
 package cmd
 
@@ -8,13 +8,13 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"openlambda/internal/function"
-	"openlambda/internal/server/ingest"
-	"openlambda/internal/server/processing"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/AlejandroPerez92/openl4d/internal/function"
+	"github.com/AlejandroPerez92/openl4d/internal/server/ingest"
+	"github.com/AlejandroPerez92/openl4d/internal/server/processing"
 	"github.com/spf13/cobra"
 )
 

@@ -2,7 +2,8 @@ package processing
 
 import (
 	"net/http"
-	"openlambda/internal/function"
+
+	"github.com/AlejandroPerez92/openl4d/internal/function"
 )
 
 func NewServer(pendingQueue *function.PendingQueue, processingMap *function.ProcessingMap) *http.Server {

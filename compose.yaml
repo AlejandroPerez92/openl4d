@@ -2,7 +2,7 @@ services:
   runtime:
     build:
       context: ./docker/dummy-runtime
-    image: openlambda-dummy-runtime:local
+    image: openl4d-dummy-runtime:local
     environment:
       PROCESS_BASE_URL: http://host.docker.internal:8081
       RESPONSE_QUERY_KEY: echo

@@ -3,7 +3,8 @@ package processing
 import (
 	"encoding/json"
 	"net/http"
-	"openlambda/internal/function"
+
+	"github.com/AlejandroPerez92/openl4d/internal/function"
 )
 
 type SendResponseController struct {

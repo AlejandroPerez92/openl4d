@@ -1,5 +1,5 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
+Copyright © 2026 Alejandro Pérez <alxpefa@gmail.com>
 */
 package cmd
 
@@ -11,9 +11,9 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "openlambda",
-	Short: "A http lambda runtime for your k8s",
-	Long:  `Convert your http requests in a lambda function events that your deployments can consume, and return back the response`,
+	Use:   "openl4d",
+	Short: "An HTTP Lambda-style runtime for your Kubernetes cluster",
+	Long:  `Convert your HTTP requests into Lambda function events that your worker pods can consume, and return back the response.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

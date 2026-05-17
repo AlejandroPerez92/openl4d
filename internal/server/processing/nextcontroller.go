@@ -6,7 +6,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"openlambda/internal/function"
+
+	"github.com/AlejandroPerez92/openl4d/internal/function"
 )
 
 type NextController struct {
