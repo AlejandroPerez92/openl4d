@@ -1,7 +1,9 @@
 package processing
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"openlambda/internal/function"
@@ -27,7 +29,20 @@ func (p *NextController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Iterates until it finds a pending invocation that is not timed out.
 	for {
-		nextInvocation := p.pendingQueue.Dequeue()
+		nextInvocation, err := p.pendingQueue.Dequeue(r.Context())
+		if err != nil {
+			if errors.Is(err, function.ErrQueueDrained) {
+				http.Error(w, "no pending invocations", http.StatusNoContent)
+				return
+			}
+			if errors.Is(err, context.Canceled) {
+				http.Error(w, "client gone", 499)
+				return
+			}
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+
 		if nextInvocation == nil {
 			http.Error(w, "no pending invocations", http.StatusNoContent)
 			return

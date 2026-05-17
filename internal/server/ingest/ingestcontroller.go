@@ -32,15 +32,18 @@ func (p *IngestController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	invocation := &function.Invocation{
 		Event:        function.FromRequest(r),
-		ResponseChan: make(chan *function.HttpResponseEvent),
+		ResponseChan: make(chan *function.HttpResponseEvent, 1),
 		Ctx:          ctx,
 		Deadline:     maxLifetime,
 	}
 
 	if err := p.pendingQueue.Enqueue(invocation); err != nil {
 		log.Printf("invocation finished: %v", invocation.Event.RequestContext.RequestID)
+		log.Printf("invocation finished err: %v", err)
 		p.cleanup(invocation)
-		if errors.Is(err, context.DeadlineExceeded) {
+		if errors.Is(err, function.ErrQueueClosed) {
+			http.Error(w, "shutting down", http.StatusServiceUnavailable)
+		} else if errors.Is(err, context.DeadlineExceeded) {
 			http.Error(w, "function timeout", http.StatusGatewayTimeout)
 		} else {
 			http.Error(w, "client gone", 499)
@@ -55,6 +58,7 @@ func (p *IngestController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	case <-ctx.Done():
+		log.Printf("context done: %v", invocation.Event.RequestContext.RequestID)
 		p.cleanup(invocation)
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			http.Error(w, "function timeout", http.StatusGatewayTimeout)
@@ -67,7 +71,7 @@ func (p *IngestController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *IngestController) cleanup(invocation *function.Invocation) {
-	log.Printf("invocation finished: %v", invocation.Event.RequestContext.RequestID)
+	log.Printf("cleaning up invocation: %v", invocation.Event.RequestContext.RequestID)
 	reqId := invocation.Event.RequestContext.RequestID
 	p.processingMap.Delete(reqId)
 	invocation.Cancel()

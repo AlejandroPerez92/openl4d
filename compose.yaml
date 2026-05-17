@@ -1,0 +1,12 @@
+services:
+  runtime:
+    build:
+      context: ./docker/dummy-runtime
+    image: openlambda-dummy-runtime:local
+    environment:
+      PROCESS_BASE_URL: http://host.docker.internal:8081
+      RESPONSE_QUERY_KEY: echo
+      LOG_EVERY: "1000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

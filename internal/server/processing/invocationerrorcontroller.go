@@ -33,6 +33,11 @@ func (p *InvocationErrorController) ServeHTTP(w http.ResponseWriter, r *http.Req
 		http.Error(w, "no such invocation", http.StatusNotFound)
 		return
 	}
+	if invocation.IsCancelled() || invocation.Ctx.Err() != nil {
+		p.processingMap.Delete(requestID)
+		http.Error(w, "invocation no longer active", http.StatusGone)
+		return
+	}
 
 	var resp function.InvocationErrorEvent
 	decoder := json.NewDecoder(r.Body)
@@ -52,6 +57,9 @@ func (p *InvocationErrorController) ServeHTTP(w http.ResponseWriter, r *http.Req
 	case invocation.ResponseChan <- &response:
 		p.processingMap.Delete(requestID)
 		w.WriteHeader(http.StatusAccepted)
+	case <-invocation.Ctx.Done():
+		p.processingMap.Delete(requestID)
+		http.Error(w, "invocation no longer active", http.StatusGone)
 	case <-r.Context().Done():
 		http.Error(w, "client gone", 499)
 	}

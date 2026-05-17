@@ -31,3 +31,9 @@ func (m *ProcessingMap) Delete(eventID string) {
 	defer m.mu.Unlock()
 	delete(m.invocations, eventID)
 }
+
+func (m *ProcessingMap) Len() int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return len(m.invocations)
+}

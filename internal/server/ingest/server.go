@@ -5,19 +5,16 @@ import (
 	"openlambda/internal/function"
 )
 
-func Init(pendingQueue *function.PendingQueue, processingMap *function.ProcessingMap) error {
-
+func NewServer(pendingQueue *function.PendingQueue, processingMap *function.ProcessingMap) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle("/", NewIngestController(pendingQueue, processingMap))
-	server := http.Server{
+	server := &http.Server{
 		Addr:    ":8080",
 		Handler: mux,
 	}
-	err := server.ListenAndServe()
+	return server
+}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+func Init(pendingQueue *function.PendingQueue, processingMap *function.ProcessingMap) error {
+	return NewServer(pendingQueue, processingMap).ListenAndServe()
 }
