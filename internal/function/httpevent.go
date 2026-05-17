@@ -148,3 +148,9 @@ type HttpResponseEvent struct {
 	IsBase64Encoded   bool                `json:"isBase64Encoded,omitempty"`
 	Cookies           []string            `json:"cookies"`
 }
+
+type InvocationErrorEvent struct {
+	ErrorMessage string   `json:"errorMessage"`
+	ErrorType    string   `json:"errorType"`
+	StackTrace   []string `json:"stackTrace"`
+}

@@ -1,5 +1,5 @@
 ### Execute a random endpoint
-GET http://localhost:8080/fuck-you
+GET http://localhost:8080/open-l4d
 ###
 
 ### 1) Ask for next invocation
@@ -23,4 +23,17 @@ Content-Type: application/json
   "body": "{\"ok\":true}",
   "isBase64Encoded": false,
   "cookies": []
+}
+
+### 3) Send a runtime error using captured requestId
+POST http://localhost:8081/runtime/invocation/{{requestId}}/error
+Content-Type: application/json
+
+{
+  "errorMessage": "This is a runtime error",
+  "errorType": "Runtime.UnknownReason",
+  "stackTrace": [
+    "line 123123",
+    "line 456456"
+  ]
 }
