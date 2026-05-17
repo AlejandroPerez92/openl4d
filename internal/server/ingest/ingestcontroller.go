@@ -3,7 +3,9 @@ package ingest
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"openlambda/internal/function"
 	"strings"
@@ -11,24 +13,40 @@ import (
 )
 
 type IngestController struct {
-	pendingQueue *function.PendingQueue
+	pendingQueue  *function.PendingQueue
+	processingMap *function.ProcessingMap
 }
 
-func NewIngestController(pendingQueue *function.PendingQueue) *IngestController {
+func NewIngestController(pendingQueue *function.PendingQueue, processingMap *function.ProcessingMap) *IngestController {
 	return &IngestController{
-		pendingQueue: pendingQueue,
+		pendingQueue:  pendingQueue,
+		processingMap: processingMap,
 	}
 }
 
 func (p *IngestController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	invocation := function.Invocation{
+	maxLifetime := time.Now().Add(30 * time.Second)
+
+	ctx, cancel := context.WithDeadline(r.Context(), maxLifetime)
+	defer cancel()
+
+	invocation := &function.Invocation{
 		Event:        function.FromRequest(r),
 		ResponseChan: make(chan *function.HttpResponseEvent),
-		Ctx:          context.Background(),
-		Deadline:     time.Now().Add(30 * time.Second),
+		Ctx:          ctx,
+		Deadline:     maxLifetime,
 	}
 
-	p.pendingQueue.Enqueue(&invocation)
+	if err := p.pendingQueue.Enqueue(invocation); err != nil {
+		log.Printf("invocation finished: %v", invocation.Event.RequestContext.RequestID)
+		p.cleanup(invocation)
+		if errors.Is(err, context.DeadlineExceeded) {
+			http.Error(w, "function timeout", http.StatusGatewayTimeout)
+		} else {
+			http.Error(w, "client gone", 499)
+		}
+		return
+	}
 
 	select {
 	case resp := <-invocation.ResponseChan:
@@ -36,11 +54,23 @@ func (p *IngestController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	case <-r.Context().Done():
+	case <-ctx.Done():
+		p.cleanup(invocation)
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			http.Error(w, "function timeout", http.StatusGatewayTimeout)
+			return
+		}
+
 		http.Error(w, "client gone", 499)
-	case <-time.After(invocation.Deadline.Sub(time.Now())):
-		http.Error(w, "function timeout", http.StatusGatewayTimeout)
+
 	}
+}
+
+func (p *IngestController) cleanup(invocation *function.Invocation) {
+	log.Printf("invocation finished: %v", invocation.Event.RequestContext.RequestID)
+	reqId := invocation.Event.RequestContext.RequestID
+	p.processingMap.Delete(reqId)
+	invocation.Cancel()
 }
 
 func writeResponse(w http.ResponseWriter, resp function.HttpResponseEvent) error {

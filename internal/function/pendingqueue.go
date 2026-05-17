@@ -10,9 +10,14 @@ func NewPendingQueue() *PendingQueue {
 	}
 }
 
-func (q *PendingQueue) Enqueue(invocation *Invocation) {
+func (q *PendingQueue) Enqueue(invocation *Invocation) error {
 	//@TODO: add capacity control and sigterm control
-	q.ch <- invocation
+	select {
+	case q.ch <- invocation:
+		return nil
+	case <-invocation.Ctx.Done():
+		return invocation.Ctx.Err()
+	}
 }
 
 func (q *PendingQueue) Dequeue() *Invocation {

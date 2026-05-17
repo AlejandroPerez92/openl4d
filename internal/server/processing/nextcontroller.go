@@ -2,6 +2,7 @@ package processing
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"openlambda/internal/function"
 )
@@ -24,20 +25,29 @@ func (p *NextController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nextInvocation := p.pendingQueue.Dequeue()
-	if nextInvocation == nil {
-		http.Error(w, "no pending invocations", http.StatusNoContent)
+	// Iterates until it finds a pending invocation that is not timed out.
+	for {
+		nextInvocation := p.pendingQueue.Dequeue()
+		if nextInvocation == nil {
+			http.Error(w, "no pending invocations", http.StatusNoContent)
+			return
+		}
+
+		if nextInvocation.IsCancelled() {
+			log.Printf("invocation cancelled: %v", nextInvocation.Event.RequestContext.RequestID)
+			continue
+		}
+
+		p.processingMap.Put(nextInvocation)
+
+		jsonEvent, err := json.Marshal(nextInvocation.Event)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(jsonEvent)
 		return
 	}
-
-	p.processingMap.Put(nextInvocation)
-
-	jsonEvent, err := json.Marshal(nextInvocation.Event)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write(jsonEvent)
 }

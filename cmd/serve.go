@@ -25,7 +25,7 @@ var serveCmd = &cobra.Command{
 
 		go func() {
 			log.Println("Starting ingest server on :8080")
-			if err := ingest.Init(pendingQueue); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := ingest.Init(pendingQueue, processingMap); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Fatalf("ingest listen: %s\n", err)
 			}
 		}()
